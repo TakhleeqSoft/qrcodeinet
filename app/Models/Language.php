@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use Spatie\Searchable\Searchable;
 use Kyslik\ColumnSortable\Sortable;
 use Spatie\Searchable\SearchResult;
@@ -44,4 +45,9 @@ class Language extends Model implements Searchable
             $url
         );
     }
+
+    public function users()
+{
+    return $this->belongsToMany(User::class, 'language_user');
+}
 }

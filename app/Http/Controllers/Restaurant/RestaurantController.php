@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Restaurant;
 
 use App\Models\Food;
+use App\Models\Language;
 use App\Models\User;
 use App\Models\Restaurant;
 use App\Models\FoodCategory;
@@ -23,9 +24,9 @@ class RestaurantController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:show restaurants')->only('index','show');
-        $this->middleware('permission:add restaurants')->only('create','store');
-        $this->middleware('permission:edit restaurants')->only('edit','update');
+        $this->middleware('permission:show restaurants')->only('index', 'show');
+        $this->middleware('permission:add restaurants')->only('create', 'store');
+        $this->middleware('permission:edit restaurants')->only('edit', 'update');
         $this->middleware('permission:delete restaurants')->only('destroy');
     }
 
@@ -44,7 +45,7 @@ class RestaurantController extends Controller
 
         if ($user->user_type == User::USER_TYPE_STAFF) {
 
-            $assigned_restaurant=RestaurantUser::where('user_id',$user->id)->pluck('restaurant_id')->toArray();
+            $assigned_restaurant = RestaurantUser::where('user_id', $user->id)->pluck('restaurant_id')->toArray();
             $params['assigned_restaurant'] = $assigned_restaurant;
             $params['user_id'] = $user->created_by;
 
@@ -60,8 +61,8 @@ class RestaurantController extends Controller
     {
 
         $userPlan = isset($user->current_plans[0]) ? $user->current_plans[0] : '';
-        if ($user->user_type==User::USER_TYPE_STAFF) {
-            $owner=User::find($user->created_by);
+        if ($user->user_type == User::USER_TYPE_STAFF) {
+            $owner = User::find($user->created_by);
             $userPlan = isset($owner->current_plans[0]) ? $owner->current_plans[0] : '';
         }
 
@@ -69,7 +70,7 @@ class RestaurantController extends Controller
         $vendor_id = ($user->user_type == User::USER_TYPE_STAFF) ? $user->created_by : $user->id;
         $userRestaurants = Restaurant::where('user_id', $vendor_id)->count();
 
-        if ($user->user_type != User::USER_TYPE_ADMIN && $userPlan && $user->free_forever!=true) {
+        if ($user->user_type != User::USER_TYPE_ADMIN && $userPlan && $user->free_forever != true) {
 
             if ((!$userPlan || $userRestaurants >= $userPlan->restaurant_limit) && $userPlan->restaurant_unlimited != 'yes') {
                 return false;
@@ -83,7 +84,7 @@ class RestaurantController extends Controller
     public function create()
     {
         $user = auth()->user();
-        $restaurantTypes = RestaurantType::select('id','type','lang_restaurant_type')->orderBy('type','asc')->get();
+        $restaurantTypes = RestaurantType::select('id', 'type', 'lang_restaurant_type')->orderBy('type', 'asc')->get();
         if ($this->checkPlan($user) == false) {
             if ($user->user_type == User::USER_TYPE_STAFF) {
                 return redirect()->route('home')->with(['Error' => __('system.plans.restaurant_extends')]);
@@ -113,7 +114,7 @@ class RestaurantController extends Controller
         }
 
         $user = auth()->user();
-        $data = $request->only('name', 'user_id', 'slug','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url','type', 'contact_email', 'phone_number', 'language', 'city', 'state', 'country', 'zip', 'address', 'logo', 'dark_logo', 'cover_image', 'clone_data_into', 'theme');
+        $data = $request->only('name', 'user_id', 'slug', 'facebook_url', 'instagram_url', 'twitter_url', 'youtube_url', 'linkedin_url', 'tiktok_url', 'type', 'contact_email', 'phone_number', 'language', 'city', 'state', 'country', 'zip', 'address', 'logo', 'dark_logo', 'cover_image', 'clone_data_into', 'theme');
 
 
         DB::beginTransaction();
@@ -143,7 +144,7 @@ class RestaurantController extends Controller
             'restaurant_id' => $newRestaurant->id,
         ], $restaurantSetting);
 
-        if ($user->user_type == User::USER_TYPE_STAFF){
+        if ($user->user_type == User::USER_TYPE_STAFF) {
             RestaurantUser::create([
                 'restaurant_id' => $newRestaurant->id,
                 'user_id' => $user->id,
@@ -179,7 +180,7 @@ class RestaurantController extends Controller
 
             if (count($inserts) > 0) {
                 $inserts = array_map("unserialize", array_unique(array_map("serialize", $inserts)));
-                $d =   DB::table('food_food_category')->insert($inserts);
+                $d = DB::table('food_food_category')->insert($inserts);
             }
         }
 
@@ -188,6 +189,7 @@ class RestaurantController extends Controller
             $check_user->restaurant_id = $newRestaurant->id;
             $check_user->save();
         }
+
 
         //Assign Vendor To Restro
         RestaurantUser::create([
@@ -206,16 +208,19 @@ class RestaurantController extends Controller
         if (($redirect = $this->checkRestaurantIsValidUser($restaurant)) != null) {
             return redirect($redirect);
         }
-        $restaurant->load(['created_user', 'users' => function ($q) {
-            $q->limit(5);
-        }]);
+        $restaurant->load([
+            'created_user',
+            'users' => function ($q) {
+                $q->limit(5);
+            }
+        ]);
         return view('restaurant.restaurants.view', ['restaurant' => $restaurant]);
     }
 
     public function edit(Restaurant $restaurant)
     {
         $user = auth()->user();
-        $restaurantTypes = RestaurantType::select('id','type','lang_restaurant_type')->orderBy('type','asc')->get();
+        $restaurantTypes = RestaurantType::select('id', 'type', 'lang_restaurant_type')->orderBy('type', 'asc')->get();
         if (($redirect = $this->checkRestaurantIsValidUser($restaurant)) != null) {
             return redirect($redirect);
         }
@@ -226,8 +231,8 @@ class RestaurantController extends Controller
             $vendor_id = ($user->user_type == User::USER_TYPE_STAFF) ? $user->created_by : $user->id;
             $vendors = User::find($vendor_id);
         }
-        $setting=$restaurant->settings;
-        return view('restaurant.restaurants.edit', ['restaurant' => $restaurant,'setting'=>$setting, 'vendors' => $vendors, 'restaurantTypes' => $restaurantTypes]);
+        $setting = $restaurant->settings;
+        return view('restaurant.restaurants.edit', ['restaurant' => $restaurant, 'setting' => $setting, 'vendors' => $vendors, 'restaurantTypes' => $restaurantTypes]);
     }
 
     public function checkRestaurantIsValidUser($restaurant)
@@ -237,9 +242,11 @@ class RestaurantController extends Controller
         if ($user->user_type == User::USER_TYPE_ADMIN) {
             return;
         }
-        $restaurant->load(['users' => function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        }]);
+        $restaurant->load([
+            'users' => function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            }
+        ]);
 
         if (count($restaurant->users) == 0) {
             $back = request()->get('back', route('restaurant.restaurants.index'));
@@ -252,9 +259,11 @@ class RestaurantController extends Controller
     public function createQR()
     {
         $users = auth()->user();
-        $users->load(['restaurant' => function ($q) {
-            $q->select('restaurants.*');
-        }]);
+        $users->load([
+            'restaurant' => function ($q) {
+                $q->select('restaurants.*');
+            }
+        ]);
         $restaurant = $users->restaurant;
         return view('restaurant.restaurants.create_qr', ['restaurant' => $restaurant]);
     }
@@ -266,7 +275,7 @@ class RestaurantController extends Controller
         }
         $restaurantTypeId = RestaurantType::where('type', $request->type)->value('id');
 
-        $data = $request->only('name','facebook_url','instagram_url','twitter_url','youtube_url','linkedin_url','tiktok_url', 'slug', 'type', 'contact_email', 'phone_number', 'language', 'city', 'state', 'country', 'zip', 'address', 'logo', 'cover_image', 'dark_logo', 'theme');
+        $data = $request->only('name', 'facebook_url', 'instagram_url', 'twitter_url', 'youtube_url', 'linkedin_url', 'tiktok_url', 'slug', 'type', 'contact_email', 'phone_number', 'language', 'city', 'state', 'country', 'zip', 'address', 'logo', 'cover_image', 'dark_logo', 'theme');
         $restaurant->restaurant_type_id = $restaurantTypeId;
         $restaurant->fill($data)->save();
 
@@ -323,15 +332,19 @@ class RestaurantController extends Controller
         if (($redirect = $this->checkRestaurantIsValidUser($restaurant)) != null) {
             return redirect($redirect);
         }
-        $restaurant->load(['users' => function ($q) use ($restaurant) {
-            $q->where('users.restaurant_id', $restaurant->id);
-        }]);
+        $restaurant->load([
+            'users' => function ($q) use ($restaurant) {
+                $q->where('users.restaurant_id', $restaurant->id);
+            }
+        ]);
 
         if (count($restaurant->users) > 0) {
             foreach ($restaurant->users as $restoUser) {
-                $restoUser->load(['restaurants' => function ($q) use ($restaurant) {
-                    $q->wherePivot('restaurant_id', '!=', $restaurant->id);
-                }]);
+                $restoUser->load([
+                    'restaurants' => function ($q) use ($restaurant) {
+                        $q->wherePivot('restaurant_id', '!=', $restaurant->id);
+                    }
+                ]);
                 if (count($restoUser->restaurants) > 0) {
                     $restoUser->restaurant_id = $restoUser->restaurants->first()->id;
                 } else {
@@ -367,8 +380,8 @@ class RestaurantController extends Controller
     public function genarteQR(Restaurant $restaurant)
     {
         $request = request();
-        $size = $request->size  && ($request->size >= 100 &&  $request->size <= 325) ? $request->size : 325;
-        $logo_size = $request->logo_size  && ($request->logo_size >= 0.25 &&  $request->logo_size <=  0.5) ? $request->logo_size : 0.25;
+        $size = $request->size && ($request->size >= 100 && $request->size <= 325) ? $request->size : 325;
+        $logo_size = $request->logo_size && ($request->logo_size >= 0.25 && $request->logo_size <= 0.5) ? $request->logo_size : 0.25;
         if (isset($request->image) && $request->has('image')) {
             $file = $request->image;
             $logo = File::get($file->getRealPath());
@@ -378,28 +391,28 @@ class RestaurantController extends Controller
 
         $color = $request->color ?? "#000000";
         list($cr, $cg, $cb) = sscanf($color, "#%02x%02x%02x");
-        $color_transparent = $request->color_transparent  && ($request->color_transparent >= 1 &&  $request->color_transparent <=  100) ? $request->color_transparent : 100;
+        $color_transparent = $request->color_transparent && ($request->color_transparent >= 1 && $request->color_transparent <= 100) ? $request->color_transparent : 100;
 
-        $back_color = $request->back_color  ??  "#ffffff";
+        $back_color = $request->back_color ?? "#ffffff";
         list($br, $bg, $bb) = sscanf($back_color, "#%02x%02x%02x");
-        $back_color_transparent = $request->back_color_transparent  && ($request->back_color_transparent >= 0 &&  $request->back_color_transparent <=  100) ? $request->back_color_transparent : 1;
+        $back_color_transparent = $request->back_color_transparent && ($request->back_color_transparent >= 0 && $request->back_color_transparent <= 100) ? $request->back_color_transparent : 1;
 
-        $gradient_method = $request->gradient_method  && in_array($request->gradient_method, ['vertical', 'horizontal', 'diagonal', 'inverse_diagonal', 'radial']) ? $request->gradient_method : 'vertical';
+        $gradient_method = $request->gradient_method && in_array($request->gradient_method, ['vertical', 'horizontal', 'diagonal', 'inverse_diagonal', 'radial']) ? $request->gradient_method : 'vertical';
         $gradient_color1 = $request->gradient_color1 ?? "#000000";
         list($l1r, $l1g, $l1b) = sscanf($gradient_color1, "#%02x%02x%02x");
-        $gradient_color2 =  $request->gradient_color2 ??  "#000000";
+        $gradient_color2 = $request->gradient_color2 ?? "#000000";
         list($l2r, $l2g, $l2b) = sscanf($gradient_color2, "#%02x%02x%02x");
 
-        $qr_style = $request->qr_style  && in_array($request->qr_style,  ['square', 'dot', 'round']) ? $request->qr_style : 'square';
-        $qr_style_size = $request->qr_style_size  && ($request->qr_style_size >= 0.25 &&  $request->qr_style_size <=  0.5) ? $request->qr_style_size : 1;
+        $qr_style = $request->qr_style && in_array($request->qr_style, ['square', 'dot', 'round']) ? $request->qr_style : 'square';
+        $qr_style_size = $request->qr_style_size && ($request->qr_style_size >= 0.25 && $request->qr_style_size <= 0.5) ? $request->qr_style_size : 1;
 
-        $eye_style = $request->eye_style  && in_array($request->eye_style,  ['square', 'circle']) ? $request->eye_style : 'square';
-        $eye_inner_color  = $request->eye_inner_color ?? "#000000";
+        $eye_style = $request->eye_style && in_array($request->eye_style, ['square', 'circle']) ? $request->eye_style : 'square';
+        $eye_inner_color = $request->eye_inner_color ?? "#000000";
         list($eir, $eig, $eib) = sscanf($eye_inner_color, "#%02x%02x%02x");
-        $eye_outer_color  = $request->eye_outer_color ?? "#000000";
+        $eye_outer_color = $request->eye_outer_color ?? "#000000";
         list($eor, $eog, $eob) = sscanf($eye_outer_color, "#%02x%02x%02x");
 
-        $QR  = QrCode::size($size)->format('png');
+        $QR = QrCode::size($size)->format('png');
         if (isset($logo)) {
             if ($request->save == 0) {
                 list($width, $height) = getimagesize(imageDataToCollection($logo));
@@ -460,5 +473,26 @@ class RestaurantController extends Controller
             $QR->generate(route('frontend.restaurant', $restaurant->slug)),
         );
         return view('restaurant.restaurants.genarteqr', ['image' => $image]);
+    }
+
+    public function getLanguage($id)
+    {
+        $languages = Language::all();
+
+        $assignedLanguages = User::find($id)->languages->pluck('id')->toArray();
+        return view('restaurant.restaurants.language', compact('languages', 'id', 'assignedLanguages'));
+    }
+
+    public function setLanguage(Request $request)
+    {
+        $request->validate([
+            'language' => 'required',
+            'user_id' => 'required',
+        ]);
+        $user = User::find($request->user_id);
+
+        $user->languages()->sync($request->language);
+
+        return redirect()->route('restaurant.restaurants.index');
     }
 }

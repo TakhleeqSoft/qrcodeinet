@@ -1,16 +1,17 @@
 <?php
 
 use App\Models\User;
-use App\Http\Controllers\ClearCacheController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ClearCacheController;
 
  use App\Http\Controllers\ImageComposerController;
  use Intervention\Image\Facades\Image;
  use App\Http\Controllers\FoodController;
+use App\Http\Controllers\Restaurant\RestaurantController;
 use App\Http\Controllers\Restaurant\FoodCategoryController;
 
 /*
@@ -234,6 +235,8 @@ Route::middleware(['preventBackHistory'])->group(function () {
 
         // restaurant manage
         Route::resource('restaurants', App\Http\Controllers\Restaurant\RestaurantController::class)->middleware('permission:show restaurants');
+        Route::get('restaurants-language/{id}', [RestaurantController::class,'getLanguage'])->name('restaurants.language');
+        Route::post('restaurants-language', [RestaurantController::class,'setLanguage'])->name('restaurants.set-language');
         Route::resource('environment/setting/restaurant-type', App\Http\Controllers\Restaurant\RestaurantTypeController::class)->middleware('role:Super-Admin');
 
 

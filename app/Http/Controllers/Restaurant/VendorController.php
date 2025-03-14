@@ -141,6 +141,7 @@ class VendorController extends Controller
             'zip'=>$data['zip'],
         ]);
         $newUser->assignRole("vendor");
+        $newUser->languages()->sync(1);
 
         VendorSetting::updateOrCreate([
             'user_id' => $newUser->id

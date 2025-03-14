@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Feedback;
+use App\Models\Language;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Searchable\Searchable;
 use Kyslik\ColumnSortable\Sortable;
@@ -212,4 +213,9 @@ class User extends Authenticatable implements Searchable, MustVerifyEmail
             return $this->belongsTo(VendorSetting::class, 'created_by', 'user_id');
         }
     }
+
+    public function languages()
+{
+    return $this->belongsToMany(Language::class, 'language_user');
+}
 }

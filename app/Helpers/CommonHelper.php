@@ -57,12 +57,17 @@ function getFileUrl($file)
 
 function getAllLanguages($en = false, $field = 'store_location_name')
 {
+    if (auth()->check()) {
+        return auth()->user()->languages()->pluck('name')->toArray();
+    } else {
+        $languages = new Language();
+        if (!$en)
+            $languages = $languages->where('store_location_name', '!=', 'en');
+        $languages = $languages->pluck('name', $field)->toArray();
 
-    $languages = new Language();
-    if (!$en)
-        $languages = $languages->where('store_location_name', '!=', 'en');
-    $languages = $languages->pluck('name', $field)->toArray();
-    return $languages;
+        return $languages;
+    }
+
 }
 
 function getAllCurrentRestaruentLanguages()
@@ -100,9 +105,9 @@ function generateLanguageStoreDirName($languageName, $length = 2)
     $genatedName = substr(strtolower($languageName), 0, $length);
     if (File::exists(lang_path($genatedName))) {
         if (strlen($languageName) >= $length) {
-            return  $languageName .= "_" . time();
+            return $languageName .= "_" . time();
         }
-        return  generateLanguageStoreDirName($languageName, $length + 1);
+        return generateLanguageStoreDirName($languageName, $length + 1);
     }
     return $genatedName;
 }
@@ -304,7 +309,7 @@ function imageDataToCollection($fileData)
         0,
         true // Mark it as test, since the file isn't from real HTTP POST.
     );
-    return  $file;
+    return $file;
 }
 
 
@@ -342,7 +347,7 @@ function globalSearch($search, $user)
     $params['lang'] = app()->getLocale();
     $restpParams['user_id'] = $user->id;
     $searchResults = (new Search())
-        ->registerModel(User::class,  function (ModelSearchAspect $modelSearchAspect) use ($params) {
+        ->registerModel(User::class, function (ModelSearchAspect $modelSearchAspect) use ($params) {
             $modelSearchAspect
                 ->addSearchableAttribute('first_name')
                 ->addSearchableAttribute('last_name')
@@ -367,7 +372,7 @@ function globalSearch($search, $user)
                 });
         })
         ->registerModel(Food::class, function (ModelSearchAspect $modelSearchAspect) use ($params) {
-            $search =   $modelSearchAspect
+            $search = $modelSearchAspect
                 ->addSearchableAttribute('name')
                 ->addExactSearchableAttribute('price')
                 ->when(isset($params['restaurant_id']), function ($query) use ($params) {
@@ -377,7 +382,7 @@ function globalSearch($search, $user)
                 $search = $search->addSearchableAttribute('lang_name->' . $params['lang']);
         })
         ->registerModel(FoodCategory::class, function (ModelSearchAspect $modelSearchAspect) use ($params) {
-            $search =     $modelSearchAspect
+            $search = $modelSearchAspect
                 ->addSearchableAttribute('category_name')
 
                 ->when(isset($params['restaurant_id']), function ($query) use ($params) {
@@ -432,6 +437,7 @@ function formatDate($date)
     return date(config('app.date_time_format'), strtotime($date));
 }
 
-function getSiteSetting(){
-   return Settings::pluck('value', 'title')->toArray();
+function getSiteSetting()
+{
+    return Settings::pluck('value', 'title')->toArray();
 }

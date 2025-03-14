@@ -31,5 +31,14 @@ return [
     'you_want_to_delete_this'=>'هل تريد حذف هذا؟',
     'yes'=>'نعم',
     'no'=>'لا',
+    // 'add_language' => 'Add Language',
+    // 'select_language' => 'Select Languages',
+    // 'select_all' => 'Select All',
+    // 'deselect_all' => 'Deselect All',
+    'select_language' => 'حدد اللغات',
+    'add_language' => 'إضافة لغة',
+    'languages' => 'اللغات',
+    'select_all' => 'حدد الكل',
+    'deselect_all' => 'قم بإلغاء تحديد الكل',
 
 ];

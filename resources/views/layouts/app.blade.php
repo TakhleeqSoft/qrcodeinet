@@ -34,6 +34,10 @@
         <link rel="stylesheet" href="{{ asset('assets/css/app-rtl.min.css') }}" type="text/css" />
     @endif
     <link rel="stylesheet" href="{{ asset('assets/cdns/intlTelInput.css') }}" />
+    <!-- multiselect css-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css"
+        href="https://client.takhleeqsoft.com/khatabook/public/assets/css/select2.css">
 
     <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
     @stack('third_party_stylesheets')
@@ -179,7 +183,7 @@
                                 </button>
                             </div>
                         @endhasanyrole
-                        @hasanyrole('Super-Admin')
+                        {{-- @hasanyrole('Super-Admin') --}}
                             <div class="dropdown d-inline-block ms-1">
                                 <button type="button" class="btn header-item" data-bs-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">
@@ -212,7 +216,7 @@
                                     </div>
                                 </div>
                             </div>
-                        @endhasanyrole
+                        {{-- @endhasanyrole --}}
                         <div class="dropdown d-inline-block">
                             <button type="button" class="btn header-item bg-soft-light "
                                 id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true"
@@ -351,7 +355,14 @@
         </div>
         @include('layouts.right_bar')
     </div>
-
+    <script>
+        $(document).ready(function() {
+            $('#languageSelect').select2({
+                placeholder: "Select Languages", // Placeholder text
+                allowClear: true // Allow clearing selections
+            });
+        });
+    </script>
     <script>
         const themeRoute = '{{ route('theme.mode') }}';
 
@@ -399,7 +410,25 @@
     <script src="{{ asset('assets/libs/feather-icons/feather.min.js') }}"></script>
     <script src="{{ asset('assets/js/pages/form-mask.init.js') }}"></script>
     <script src="{{ asset('assets/js/custom.js') }}"></script>
+    <!-- multiselect Plugin used-->
+    <script src="https://client.takhleeqsoft.com/khatabook/public/assets/js/select2/select2.full.min.js"></script>
+    <script src="https://client.takhleeqsoft.com/khatabook/public/assets/js/select2/select2-custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.full.min.js"></script>
+    <!-- Plugin used-->
+    <script>
+        $('.select-all').click(function() {
+            let $select2 = $(this).parent().siblings('.select2')
+            $select2.find('option').prop('selected', 'selected')
+            $select2.trigger('change')
+        })
+        $('.deselect-all').click(function() {
+            let $select2 = $(this).parent().siblings('.select2')
+            $select2.find('option').prop('selected', '')
+            $select2.trigger('change')
+        })
 
+        $('.select2').select2()
+    </script>
     @include('js')
     @stack('third_party_scripts')
     @stack('page_scripts')
