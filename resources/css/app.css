@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .actives img{
+        @apply
+        border-[#1C84EE]
+
+    }
+}
+.header-scroll {
+    @apply bg-white dark:bg-black;
+}
+
+.open_search,
+.modal.show {
+    @apply block;
+}
