@@ -31,4 +31,9 @@ return [
     'you_want_to_delete_this'=>'You want to delete this?',
     'yes'=>'Yes',
     'no'=>'No',
+    'add_language' => 'Add Language',
+    'select_language' => 'Select Languages',
+    'languages' => 'Languages',
+    'select_all' => 'Select All',
+    'deselect_all' => 'Deselect All',
 ];

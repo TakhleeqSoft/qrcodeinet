@@ -109,6 +109,7 @@ class FrontController extends Controller
     }
     public function restaurant($restaurant_slug)
     {
+
         $hide_restaurant_after_days = config('app.hide_restaurant_after_days');
         $restaurant = Restaurant::where('slug', $restaurant_slug)->with('vendor_setting')->with('settings')->first();
         if (empty($restaurant)) {

@@ -302,6 +302,7 @@ class VendorController extends Controller
 
     public function setting()
     {
+
         $vendor = auth()->user();
         if ($vendor->user_type == 1) {
             return redirect('home');

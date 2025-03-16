@@ -62,8 +62,8 @@
                                 <a href="{{ route('restaurant.restaurants.language', $restaurant->user_id) }}">
                                     {{ $restaurant->users[0]->languages()->pluck('name')->implode(', ') }}
                                 </a>
-                            <td>
-                            @endhasanyrole
+                            </td>
+                        @endhasanyrole
                         <td>
                             {{ $restaurant->created_at }}
                         </td>

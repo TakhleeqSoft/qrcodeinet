@@ -58,8 +58,33 @@ function getFileUrl($file)
 function getAllLanguages($en = false, $field = 'store_location_name')
 {
     if (auth()->check()) {
-        return auth()->user()->languages()->pluck('name')->toArray();
+        if (auth()->user()->user_type == User::USER_TYPE_ADMIN) {
+            return Language::pluck('name', $field)->toArray();
+        } else {
+            auth()->user()->id;
+            return Language::whereHas('users', function ($q) {
+                $q->where('user_id', auth()->user()->id);
+            })->pluck('name', $field)->toArray();
+
+        }
     } else {
+        $slug = request()->segments(1);
+        $restaurant = Restaurant::where('slug', $slug)->first();
+
+        if ($restaurant) {
+            // Assuming 'language_user' has 'restaurant_id' and 'language_id'
+            $languageIds = DB::table('language_user')
+                ->where('user_id', $restaurant->user_id)
+                ->pluck('language_id')->toArray();
+
+            $languages = new Language();
+            if (!$en)
+                $languages = $languages->where('store_location_name', '!=', 'en');
+            $languages = $languages->whereIn('id', $languageIds);
+            $languages = $languages->pluck('name', $field)->toArray();
+            return $languages;
+        }
+
         $languages = new Language();
         if (!$en)
             $languages = $languages->where('store_location_name', '!=', 'en');
@@ -70,11 +95,36 @@ function getAllLanguages($en = false, $field = 'store_location_name')
 
 }
 
-function getAllCurrentRestaruentLanguages()
+function getAllCurrentRestaruentLanguages($en = false, $field = 'store_location_name')
 {
 
 
-    return getAllLanguages();
+    if (auth()->check()) {
+        // Get the authenticated user
+        $user = auth()->user();
+    
+        // Check if the user is an admin
+        if ($user->user_type == User::USER_TYPE_ADMIN) {
+            // Return all languages for admin
+            return Language::pluck('name', $field)->toArray();
+        } else {
+            // For non-admin users, fetch languages assigned to the user
+            return Language::whereHas('users', function ($query) use ($user) {
+                $query->where('user_id', $user->id)->where('store_location_name', '!=', 'en');
+            })
+            ->pluck('name', $field)
+            ->toArray();
+        }
+    } else {
+        // For guests, fetch all languages (excluding English if specified)
+        $languages = Language::query();
+    
+        if (!$en) {
+            $languages = $languages->where('store_location_name', '!=', 'en');
+        }
+    
+        return $languages->pluck('name', $field)->toArray();
+    }
 }
 
 function getAllThemes()
